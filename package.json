@@ -26,7 +26,6 @@
     "web-vitals": "^0.2.4"
   },
   "scripts": {
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js --host 0.0.0.0",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
