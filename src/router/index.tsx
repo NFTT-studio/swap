@@ -1,7 +1,7 @@
 /* eslint-disable import/no-anonymous-default-export */
 import React from 'react';
 import {
-  BrowserRouter as Router,
+  HashRouter as Router,
   Routes,
   Route,
   Navigate,
@@ -12,12 +12,12 @@ import {
 
 import Home from '../pages/Home';
 import Other from '../pages/Other';
-
+import Swap from '../pages/Swap';
 
 export default () => (
   <Router>
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<Swap />} />
       <Route path="/other" element={<Other />} />
       <Route element={<Home />} />
     </Routes>
