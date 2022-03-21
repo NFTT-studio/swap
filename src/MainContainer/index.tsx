@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Flex,
 } from '@chakra-ui/react';
-import Helmet from 'react-helmet';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 
 interface Props {
   children: React.ReactNode;
@@ -13,10 +13,12 @@ const MainContainer = ({ children, title }: Props) => {
 
   return (
     <>
-      <Helmet>
-        {title && <title>{title}</title>}
-        <link rel="canonical" href="../" />
-      </Helmet>
+      <HelmetProvider>
+        <Helmet>
+          {title && <title>{title}</title>}
+          <link rel="canonical" href="../" />
+        </Helmet>
+      </HelmetProvider>
       <Flex
         as="main"
         height="100%"

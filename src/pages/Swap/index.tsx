@@ -1,24 +1,16 @@
 /* eslint-disable max-len */
 /* eslint-disable no-nested-ternary */
-import React, { useState, MouseEventHandler, useEffect } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import {
-  Spinner,
   Link,
   Flex,
   Text,
-  Center,
   Button,
-  SimpleGrid,
   useMediaQuery,
   InputGroup,
   Input,
   InputRightAddon,
   useToast,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
 } from '@chakra-ui/react';
 import {
   useFormik,
@@ -33,8 +25,6 @@ import { encodeAddress } from '@polkadot/util-crypto';
 
 const Home = () => {
   const toast = useToast();
-  const [isLargerThan700] = useMediaQuery('(min-width: 700px)');
-  const [selectId, setSelectId] = useState('');
   const [injected, setInjected] = useState(false);
   const [value, setValue] = useState("");
   const [injectedAccounts, setInjectedAccounts] = useState<InjectedAccountWithMeta[]>([]);
