@@ -34,7 +34,7 @@ export const txLog = (result: any, onSuccess = (res: any) => res) => {
   if (result.status.isInBlock) {
     toast({
       title: '',
-      description: 'Trx.inblock',
+      description: 'Transaction in block',
       status: 'info',
       duration: 8000,
     });
@@ -42,7 +42,7 @@ export const txLog = (result: any, onSuccess = (res: any) => res) => {
   } else if (result.status.isFinalized) {
     toast({
       title: '',
-      description: 'Trx.finalize',
+      description: 'Transaction finalized',
       status: 'success',
       duration: 8000,
     });
@@ -51,14 +51,14 @@ export const txLog = (result: any, onSuccess = (res: any) => res) => {
   } else if (result.status.isBroadcast) {
     toast({
       title: '',
-      description: 'Trx.broadcasting',
+      description: 'Transaction is broadcasting',
       status: 'info',
       duration: 10000,
     });
   } else if (result.status.isInvalid) {
     toast({
       title: 'error',
-      description: 'Trx.failed',
+      description: 'Transaction failed',
       status: 'info',
       duration: 5000,
     });
