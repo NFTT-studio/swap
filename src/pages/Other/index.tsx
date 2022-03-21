@@ -111,8 +111,9 @@ const Home = () => {
               justifyContent="center"
               flexDirection="column"
             >
-              {data.map((item) => (
+              {data.map((item, index) => (
                 <Flex
+                  key={index.toString()}
                   w="100%"
                   background="#FFFFFF"
                   borderBottom="1px solid #CED0CF"
@@ -167,15 +168,18 @@ const Home = () => {
                     flexDirection="column"
                     alignItems="center"
                   >
-                    <QRCode
-                      value={name}
-                      size={128}
-                      bgColor={"#ffffff"}
-                      fgColor={"#018905"}
-                      level={"L"}
-                      includeMargin={false}
-                      renderAs={"svg"}
-                    />
+                    {name ?
+                      <QRCode
+                        value={name}
+                        size={128}
+                        bgColor={"#ffffff"}
+                        fgColor={"#018905"}
+                        level={"L"}
+                        includeMargin={false}
+                        renderAs={"svg"}
+                      /> : ""
+                    }
+
                     <Flex
                       mt="10px"
                       alignItems="center"
