@@ -10,14 +10,14 @@ import {
 // import { Redirect } from 'react-router'
 
 
-import Swap from '../pages/Swap';
+import Home from '../pages/Home';
 
 export default () => (
   <Router>
     <Routes>
-      <Route path="/" element={<Swap />} />
-      <Route path="/other" element={<Swap />} />
-      <Route element={<Swap />} />
+      <Route path="/" element={<Home />} />
+      <Route path="/other" element={<Home />} />
+      <Route element={<Home />} />
     </Routes>
   </Router>
 );
