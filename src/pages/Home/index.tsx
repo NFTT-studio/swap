@@ -31,8 +31,12 @@ const Home = () => {
           p="10px"
         >
           <TabList mb='1em'>
-            <Tab>NMT Substrate to Evm</Tab>
-            <Tab>NMT Evm to Substrate</Tab>
+            <Tab
+              _focus={{ boxShadow: 'none' }}
+            >NMT Substrate to Evm</Tab>
+            <Tab
+              _focus={{ boxShadow: 'none' }}
+            >NMT Evm to Substrate</Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
