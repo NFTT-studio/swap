@@ -18,6 +18,7 @@ import EvmSwap from '../evmSwap';
 
 
 const Home = () => {
+  const defaultIndex = localStorage.getItem('defaultIndex');
   return (
     <>
       <MainContainer title={"NFTMart"}>
@@ -28,13 +29,20 @@ const Home = () => {
           variant='enclosed'
           _focus={{ boxShadow: 'none' }}
           border="1px solid #E5E5E5"
-          p="10px"
+          p="10px 0"
+          defaultIndex={Number(defaultIndex)}
         >
           <TabList mb='1em'>
             <Tab
+              onClick={() => {
+                localStorage.setItem('defaultIndex', '0')
+              }}
               _focus={{ boxShadow: 'none' }}
             >NMT Substrate to Evm</Tab>
             <Tab
+              onClick={() => {
+                localStorage.setItem('defaultIndex', '1')
+              }}
               _focus={{ boxShadow: 'none' }}
             >NMT Evm to Substrate</Tab>
           </TabList>

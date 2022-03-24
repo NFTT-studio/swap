@@ -26,7 +26,6 @@ const Home = () => {
   const toast = useToast();
   const [injected, setInjected] = useState(false);
   const [value, setValue] = useState("");
-  const [logIn, setLogIn] = useState("");
   const [injectedAccounts, setInjectedAccounts] = useState<InjectedAccountWithMeta[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const schema = Yup.object().shape({
@@ -69,7 +68,7 @@ const Home = () => {
     onSubmit: (formValue, formAction) => {
       setIsSubmitting(true);
       substrateToEvm({
-        address: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+        address: value,
         amount: formValue?.amount,
         Gerald: formValue?.Gerald,
         cb: {
@@ -90,9 +89,7 @@ const Home = () => {
                 position: 'top',
                 duration: 3000,
               });
-              setTimeout(() => {
-                setIsSubmitting(false);
-              }, 2500);
+              setIsSubmitting(false);
             }
           },
           error: (error) => {

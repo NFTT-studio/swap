@@ -28,6 +28,6 @@ export const substrateToEvm = async ({
       address, { signer: injector.signer }, (result: any) => txLog(result, cb.success),
     );
   } catch (error:any) {
-    cb.error(error);
+    cb.error(error.toString());
   }
 };

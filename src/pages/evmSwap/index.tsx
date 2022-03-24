@@ -15,22 +15,51 @@ import {
   useFormik,
 } from 'formik';
 import * as Yup from 'yup';
-import { substrateToEvm } from '../polkaSDK/api/substrateToEvm';
+import { withdrawBalance } from '../contractUtil/api/EvmTosubstrate';
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
 import { encodeAddress } from '@polkadot/util-crypto';
+import detectEthereumProvider from '@metamask/detect-provider';
 import Login from '../../components/Login';
+import { ethers } from "ethers"
 
 
 const Home = () => {
   const toast = useToast();
+
+  type EthereumProviderEip1193 = {
+    request: (args: {
+      method: string
+      params?: unknown[] | object
+    }) => Promise<unknown>
+  }
+  const [install, setInstall] = useState(false);
   const [injected, setInjected] = useState(false);
+  const [isProvider, setIsProvider] = useState<EthereumProviderEip1193>();
+  const [chainId, setChainId] = useState("");
+  const [currentAccount, setCurrentAccount] = useState("");
   const [value, setValue] = useState("");
+  const handleChainChanged = (_chainId: any) => {
+    window.location.reload();
+
+    // this.setState({chainId:_chainId});
+  }
+  const handleAccountsChanged = async (accounts: any) => {
+    console.log(accounts);
+    if (accounts[0]) {
+      setCurrentAccount(accounts[0])
+      console.log(accounts[0])
+    } else {
+      setCurrentAccount("")
+    }
+  }
+
+
   const [injectedAccounts, setInjectedAccounts] = useState<InjectedAccountWithMeta[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const schema = Yup.object().shape({
-    Gerald: Yup.string().required("必填"),
-    amount: Yup.number().required("必填"),
+    // Gerald: Yup.string().required("必填"),
+    // amount: Yup.number().required("必填"),
   });
   const handleClick = async (index: number) => {
     // treat first account as signer
@@ -41,36 +70,81 @@ const Home = () => {
     setValue(injectedAccounts[index].address);
     console.log(value);
   };
+  const requestAccount = async () => {
+    if (isProvider) {
+      let accounts = await isProvider?.request({ method: 'eth_requestAccounts' });
+      console.log(accounts);
+      await handleAccountsChanged(accounts);
+    }
+  }
+  const _handleSwithChain = async () => {
+    try {
+      await isProvider?.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x2f9f' }],
+      });
+    } catch (switchError) {
+      console.info(switchError);
+    }
+  }
   useEffect(() => {
     const initExtension = async () => {
-      const allInjected = await web3Enable('NFTMart');
-      if (allInjected.length === 0) {
-        setInjected(false);
+      const provider: any = await detectEthereumProvider();
+      if (provider) {
+        setIsProvider(provider);
+        setInstall(true);
+        provider?.on('chainChanged', handleChainChanged);
+        provider?.on('accountsChanged', handleAccountsChanged);
+        let chainId = await provider.request({ method: 'eth_chainId' });
+        setChainId(chainId);
+        console.log(provider, chainId);
       } else {
-        setInjected(true);
-        // get accounts info in extension
-        const web3InjectedAccounts = await web3Accounts();
-        if (web3InjectedAccounts.length !== 0) {
-          console.log(web3InjectedAccounts);
-          setInjectedAccounts(web3InjectedAccounts);
-        }
+        console.log('Please install MetaMask!');
       }
     };
 
     initExtension();
   }, []);
+  useEffect(() => {
+    const initExtension = async () => {
+      await requestAccount();
+    };
+    initExtension();
+  }, [isProvider]);
+  const _handleConnectClick = async () => {
+    if (!isProvider) {
+      toast({
+        title: 'error',
+        status: 'error',
+        position: 'top',
+        duration: 3000,
+        description: "Please Install MetaMask First",
+      });
+      return;
+    }
+    if (chainId === '0x2f9f') {
+      toast({
+        title: 'error',
+        status: 'error',
+        position: 'top',
+        duration: 3000,
+        description: "Please Select NFTMart EVM Testnet First",
+      });
+      return;
+    }
+    requestAccount();
+  }
 
   const formik = useFormik({
     initialValues: {
+      receiver: '',
       amount: '',
-      Gerald: '',
     },
     onSubmit: (formValue, formAction) => {
-      setIsSubmitting(true);
-      substrateToEvm({
-        address: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+      setIsSubmitting(false);
+      withdrawBalance({
+        receiver: formValue?.receiver,
         amount: formValue?.amount,
-        Gerald: formValue?.Gerald,
         cb: {
           success: (result: any) => {
             if (result.dispatchError) {
@@ -132,6 +206,26 @@ const Home = () => {
           borderRadius="4px"
           border="1px solid #E5E5E5"
         >
+          {chainId !== '0x2f9f' ?
+            <Flex mb="34px" alignItems="center" justifyContent="center">
+              <Button
+                onClick={_handleSwithChain}
+                background='#f50057'
+                width="100%"
+                // whiteSpace="normal"
+                height="40px"
+                color="#FFFFFF"
+                fontSize="18px"
+                fontFamily="TTHoves-Medium, TTHoves"
+                fontWeight="500"
+                _hover={{
+                  background: '#c51162',
+                }}
+              >
+                {`Please Select NFTMart EVM Testnet First`}
+              </Button>
+            </Flex>
+            : null}
           <Flex mb="30px" h="21px" alignItems="center" justifyContent="center">
             <Text
               fontSize="1.5rem"
@@ -139,12 +233,12 @@ const Home = () => {
               NMT Evm to Substrate
             </Text>
           </Flex>
-          {!injected ?
+          {!install ?
             <Flex mb="34px" alignItems="center" justifyContent="center">
               <Link
                 textDecoration="none"
                 target="blank"
-                href="https://docs.google.com/forms/d/1WCNeiufW1XxLsyme7dJUys7y7t-XJRyp1nQR0bhnvVQ"
+                href="https://metamask.io/download.html"
               >
                 <Button
                   background='#f50057'
@@ -159,14 +253,14 @@ const Home = () => {
                     background: '#c51162',
                   }}
                 >
-                  {`Please click and install Polkadot {.js}`}
+                  {`Please click and install MetaMask!`}
                   <br />
-                  {`https://polkadot.js.org/extension/ `}
+                  {`https://metamask.io/download.html `}
                 </Button>
               </Link>
             </Flex>
             : null}
-          {injected && injectedAccounts.length === 0 ?
+          {install && currentAccount === "" ?
             <Flex mb="34px" alignItems="center" justifyContent="center">
               <Button
                 background='#f50057'
@@ -177,11 +271,12 @@ const Home = () => {
                 fontSize="18px"
                 fontFamily="TTHoves-Medium, TTHoves"
                 fontWeight="500"
+                onClick={() => _handleConnectClick()}
                 _hover={{
                   background: '#c51162',
                 }}
               >
-                {`Please use Polkadot extension create or import your account`}
+                {`Connect Wallet`}
               </Button>
             </Flex>
             : null}
@@ -192,45 +287,45 @@ const Home = () => {
               value={value}
             />
             : null}
-          {/* {injected && injectedAccounts.length > 0 && value !== "" ?
-              <InputGroup
-                width="100%"
-                height="40px"
-                background="#FFFFFF"
-                borderRadius="4px"
-                mb="10px"
+          {install && currentAccount !== "" ?
+            <InputGroup
+              width="100%"
+              height="40px"
+              background="#FFFFFF"
+              borderRadius="4px"
+              mb="10px"
+              _focus={{
+                boxShadow: 'none',
+              }}
+            >
+              <Input
+                id="address"
+                name="address"
+                value={currentAccount}
+                isReadOnly
+                fontSize="14px"
+                fontFamily="TTHoves-Regular, TTHoves"
+                fontWeight="400"
+                lineHeight="14px"
+                isDisabled
                 _focus={{
                   boxShadow: 'none',
+                  color: '#000000',
+                  border: '1px solid #000000',
                 }}
-              >
-                <Input
-                  id="address"
-                  name="address"
-                  value={value}
-                  isReadOnly
-                  fontSize="14px"
-                  fontFamily="TTHoves-Regular, TTHoves"
-                  fontWeight="400"
-                  lineHeight="14px"
-                  isDisabled
-                  _focus={{
-                    boxShadow: 'none',
-                    color: '#000000',
-                    border: '1px solid #000000',
-                  }}
-                  _after={{
-                    boxShadow: 'none',
-                    color: '#000000',
-                    border: '1px solid #000000',
-                  }}
-                  placeholder="To Native Address"
-                  _placeholder={{
-                    color: '#999999',
-                    fontSize: '12px',
-                  }}
-                />
-              </InputGroup>
-              : null} */}
+                _after={{
+                  boxShadow: 'none',
+                  color: '#000000',
+                  border: '1px solid #000000',
+                }}
+                placeholder="To Native Address"
+                _placeholder={{
+                  color: '#999999',
+                  fontSize: '12px',
+                }}
+              />
+            </InputGroup>
+            : null}
           <InputGroup
             width="100%"
             height="40px"
@@ -242,9 +337,9 @@ const Home = () => {
             }}
           >
             <Input
-              id="Gerald"
-              name="Gerald"
-              value={formik.values.Gerald}
+              id="receiver"
+              name="receiver"
+              value={formik.values.receiver}
               onChange={formik.handleChange}
               fontSize="16px"
               fontFamily="TTHoves-Regular, TTHoves"
@@ -268,8 +363,8 @@ const Home = () => {
               }}
             />
           </InputGroup>
-          {formik.errors.Gerald && formik.touched.Gerald ? (
-            <div style={{ color: 'red' }}>{formik.errors.Gerald}</div>
+          {formik.errors.receiver && formik.touched.receiver ? (
+            <div style={{ color: 'red' }}>{formik.errors.receiver}</div>
           ) : null}
           <InputGroup
             width="100%"
