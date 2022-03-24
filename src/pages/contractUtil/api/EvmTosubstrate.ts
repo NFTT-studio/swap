@@ -53,6 +53,7 @@ export const withdrawBalance = async ({
   
       console.log("transaction receipt:")
       console.table(receipt);
+      localStorage.setItem('evmHash', tx.hash)
       cb.success(tx.hash);
     }
 

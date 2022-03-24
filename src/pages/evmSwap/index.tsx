@@ -146,11 +146,11 @@ const Home = () => {
         cb: {
           success: (result: any) => {
             toast({
-              title: 'success',
+              title: 'Transaction hash:',
               status: 'success',
               position: 'top',
               duration: 9000,
-              description: `Transaction hash:${result.toString()}`,
+              description: `${result.toString()}`,
               isClosable: true,
             });
             setIsSubmitting(false);

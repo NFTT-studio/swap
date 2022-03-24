@@ -15,16 +15,19 @@ import {
   useFormik,
 } from 'formik';
 import * as Yup from 'yup';
+import { getBalance } from '../polkaSDK/api/getBalance';
 import { substrateToEvm } from '../polkaSDK/api/substrateToEvm';
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
 import { encodeAddress } from '@polkadot/util-crypto';
 import Login from '../../components/Login';
+import { parseMoneyText } from '../../utils/fomart';
 
 
 const Home = () => {
   const toast = useToast();
   const [injected, setInjected] = useState(false);
+  const [free, setFres] = useState("");
   const [value, setValue] = useState("");
   const [injectedAccounts, setInjectedAccounts] = useState<InjectedAccountWithMeta[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,7 +41,6 @@ const Home = () => {
     // eslint-disable-next-line no-multi-assign
     injectedAccounts[index].address = encodeAddress(injectedAccounts[index].address, 12191);
     setValue(injectedAccounts[index].address);
-    console.log(value);
   };
   useEffect(() => {
     const initExtension = async () => {
@@ -58,7 +60,13 @@ const Home = () => {
 
     initExtension();
   }, []);
-
+  useEffect(() => {
+    if (value) {
+      getBalance(value).then(res => {
+        setFres(res.free)
+      });
+    }
+  }, [value]);
   const formik = useFormik({
     initialValues: {
       amount: '',
@@ -189,45 +197,6 @@ const Home = () => {
               value={value}
             />
             : null}
-          {/* {injected && injectedAccounts.length > 0 && value !== "" ?
-              <InputGroup
-                width="100%"
-                height="40px"
-                background="#FFFFFF"
-                borderRadius="4px"
-                mb="10px"
-                _focus={{
-                  boxShadow: 'none',
-                }}
-              >
-                <Input
-                  id="address"
-                  name="address"
-                  value={value}
-                  isReadOnly
-                  fontSize="14px"
-                  fontFamily="TTHoves-Regular, TTHoves"
-                  fontWeight="400"
-                  lineHeight="14px"
-                  isDisabled
-                  _focus={{
-                    boxShadow: 'none',
-                    color: '#000000',
-                    border: '1px solid #000000',
-                  }}
-                  _after={{
-                    boxShadow: 'none',
-                    color: '#000000',
-                    border: '1px solid #000000',
-                  }}
-                  placeholder="To Native Address"
-                  _placeholder={{
-                    color: '#999999',
-                    fontSize: '12px',
-                  }}
-                />
-              </InputGroup>
-              : null} */}
           <InputGroup
             width="100%"
             height="40px"
@@ -299,7 +268,7 @@ const Home = () => {
                 color: '#000000',
                 border: '1px solid #000000',
               }}
-              placeholder="Swap Amount"
+              placeholder={`Remaining amount ${free}`}
               _placeholder={{
                 color: '#999999',
                 fontSize: '12px',
