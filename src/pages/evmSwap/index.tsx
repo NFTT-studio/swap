@@ -16,16 +16,13 @@ import {
 } from 'formik';
 import * as Yup from 'yup';
 import { withdrawBalance } from '../contractUtil/api/EvmTosubstrate';
-import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
-import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
-import { encodeAddress } from '@polkadot/util-crypto';
 import detectEthereumProvider from '@metamask/detect-provider';
-import Login from '../../components/Login';
 import { ethers } from "ethers"
 
 
 const Home = () => {
   const toast = useToast();
+  const defaultIndex = localStorage.getItem('defaultIndex');
 
   type EthereumProviderEip1193 = {
     request: (args: {
@@ -34,11 +31,9 @@ const Home = () => {
     }) => Promise<unknown>
   }
   const [install, setInstall] = useState(false);
-  const [injected, setInjected] = useState(false);
   const [isProvider, setIsProvider] = useState<EthereumProviderEip1193>();
   const [chainId, setChainId] = useState("");
   const [currentAccount, setCurrentAccount] = useState("");
-  const [value, setValue] = useState("");
   const handleChainChanged = (_chainId: any) => {
     window.location.reload();
 
@@ -54,28 +49,28 @@ const Home = () => {
     }
   }
 
-
-  const [injectedAccounts, setInjectedAccounts] = useState<InjectedAccountWithMeta[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const schema = Yup.object().shape({
     // Gerald: Yup.string().required("必填"),
     // amount: Yup.number().required("必填"),
   });
-  const handleClick = async (index: number) => {
-    // treat first account as signer
-
-    const injector = await web3FromSource(injectedAccounts[index].meta.source);
-    // eslint-disable-next-line no-multi-assign
-    injectedAccounts[index].address = encodeAddress(injectedAccounts[index].address, 12191);
-    setValue(injectedAccounts[index].address);
-    console.log(value);
-  };
   const requestAccount = async () => {
-    if (isProvider) {
-      let accounts = await isProvider?.request({ method: 'eth_requestAccounts' });
-      console.log(accounts);
-      await handleAccountsChanged(accounts);
+    try {
+      if (isProvider) {
+        let accounts = await isProvider.request({ method: 'eth_requestAccounts' });
+        console.log(accounts);
+        await handleAccountsChanged(accounts);
+      }
+    } catch (error: any) {
+      toast({
+        title: 'error',
+        status: 'error',
+        position: 'top',
+        duration: 3000,
+        description: error.message,
+      });
     }
+
   }
   const _handleSwithChain = async () => {
     try {
@@ -109,8 +104,10 @@ const Home = () => {
     const initExtension = async () => {
       await requestAccount();
     };
-    initExtension();
-  }, [isProvider]);
+    if (defaultIndex === "1") {
+      initExtension();
+    }
+  }, [isProvider, defaultIndex]);
   const _handleConnectClick = async () => {
     if (!isProvider) {
       toast({
@@ -122,7 +119,7 @@ const Home = () => {
       });
       return;
     }
-    if (chainId === '0x2f9f') {
+    if (chainId !== '0x2f9f') {
       toast({
         title: 'error',
         status: 'error',
@@ -141,45 +138,32 @@ const Home = () => {
       amount: '',
     },
     onSubmit: (formValue, formAction) => {
-      setIsSubmitting(false);
+      setIsSubmitting(true);
       withdrawBalance({
+        isProvider: isProvider,
         receiver: formValue?.receiver,
         amount: formValue?.amount,
         cb: {
           success: (result: any) => {
-            if (result.dispatchError) {
-              toast({
-                title: 'error',
-                status: 'error',
-                position: 'top',
-                duration: 3000,
-                description: result.dispatchError.toString(),
-              });
-              setIsSubmitting(false);
-            } else {
-              toast({
-                title: "success",
-                status: 'success',
-                position: 'top',
-                duration: 3000,
-              });
-              setTimeout(() => {
-                setIsSubmitting(false);
-              }, 2500);
-            }
+            toast({
+              title: 'success',
+              status: 'success',
+              position: 'top',
+              duration: 9000,
+              description: `Transaction hash:${result.toString()}`,
+              isClosable: true,
+            });
+            setIsSubmitting(false);
           },
           error: (error) => {
-            if (error.toString() === 'Error: Cancelled') {
-              setIsSubmitting(false);
-            } else {
-              toast({
-                title: 'error',
-                status: 'error',
-                position: 'top',
-                duration: 3000,
-                description: error,
-              });
-            }
+            toast({
+              title: 'error',
+              status: 'error',
+              position: 'top',
+              duration: 9000,
+              description: error.message,
+              isClosable: true,
+            });
             setIsSubmitting(false);
           },
         },
@@ -279,13 +263,6 @@ const Home = () => {
                 {`Connect Wallet`}
               </Button>
             </Flex>
-            : null}
-          {injected && injectedAccounts.length > 0 ?
-            <Login
-              injectedAccounts={injectedAccounts}
-              handleClick={handleClick}
-              value={value}
-            />
             : null}
           {install && currentAccount !== "" ?
             <InputGroup
@@ -431,6 +408,7 @@ const Home = () => {
               fontWeight="500"
               lineHeight="20px"
               borderRadius="4px"
+              isDisabled={chainId !== '0x2f9f' || !currentAccount}
               type="submit"
               _hover={{
                 background: '#000000 !important',

@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 /* eslint-disable no-nested-ternary */
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Tabs,
   TabList,
@@ -8,9 +8,6 @@ import {
   Tab,
   TabPanel,
 } from '@chakra-ui/react';
-import {
-  useFormik,
-} from 'formik';
 import MainContainer from '../../MainContainer';
 import PolkaSwap from '../polkaSwap';
 import EvmSwap from '../evmSwap';

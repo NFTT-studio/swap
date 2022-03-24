@@ -2,7 +2,7 @@ import { ethers } from "ethers"
 
 const provider = new ethers.providers.JsonRpcProvider("https://staging.nftmart.io/rpc/http");
 
-const Alith = new ethers.Wallet(
+  const Alith = new ethers.Wallet(
     "0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133",
     provider,
   );

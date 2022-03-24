@@ -34,8 +34,7 @@ const Home = () => {
   });
   const handleClick = async (index: number) => {
     // treat first account as signer
-
-    const injector = await web3FromSource(injectedAccounts[index].meta.source);
+    await web3FromSource(injectedAccounts[index].meta.source);
     // eslint-disable-next-line no-multi-assign
     injectedAccounts[index].address = encodeAddress(injectedAccounts[index].address, 12191);
     setValue(injectedAccounts[index].address);
