@@ -34,7 +34,7 @@ interface Props {
 const Home = ({ setIndex }: Props) => {
   const toast = useToast();
   const [injected, setInjected] = useState(false);
-  const [free, setFres] = useState("");
+  const [free, setFres] = useState(0);
   const [value, setValue] = useState("");
   const [Tx, setTx] = useState("");
   const [injectedAccounts, setInjectedAccounts] = useState<InjectedAccountWithMeta[]>([]);
@@ -370,7 +370,7 @@ const Home = ({ setIndex }: Props) => {
                 color: '#000000',
                 border: '1px solid #000000',
               }}
-              placeholder={`Remaining amount ${free && moneyDelete(free)}`}
+              placeholder={`Remaining amount ${free && moneyDelete(free.toString())}`}
               _placeholder={{
                 color: '#999999',
                 fontSize: '12px',
