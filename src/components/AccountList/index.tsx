@@ -67,7 +67,9 @@ interface AccountListProps {
 }
 
 const AccountList: React.FC<AccountListProps> = ({ InjectedAccountList, handleClick, setOpening }) => (
-  <>
+  <Box
+    overflow="auto"
+  >
     {InjectedAccountList.map((account, index) => (
       <Account
         key={account.address}
@@ -79,7 +81,7 @@ const AccountList: React.FC<AccountListProps> = ({ InjectedAccountList, handleCl
         setOpening={setOpening}
       />
     ))}
-  </>
+  </Box>
 );
 
 export default AccountList;

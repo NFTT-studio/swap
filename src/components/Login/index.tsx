@@ -11,6 +11,7 @@ import {
   Input,
   InputGroup,
   InputRightAddon,
+  Textarea,
 } from '@chakra-ui/react';
 import AccountList from '../../components/AccountList';
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
@@ -27,13 +28,16 @@ const SortBy: FC<SortByProps> = ({ injectedAccounts, handleClick, value }) => {
 
   return (
     <>
-      <Flex alignItems="center" justifyContent="center">
+      <Flex
+        width="100%"
+        maxWidth="320px"
+        alignItems="center" justifyContent="center">
         {!value ?
           <Button
             background='#f50057'
             width="100%"
+            height="60px"
             whiteSpace="normal"
-            height="66px"
             color="#FFFFFF"
             fontSize="18px"
             fontFamily="TTHoves-Medium, TTHoves"
@@ -47,17 +51,18 @@ const SortBy: FC<SortByProps> = ({ injectedAccounts, handleClick, value }) => {
           </Button> : null
         }
         {value ?
-          <InputGroup
+          <Flex
             width="100%"
-            height="40px"
-            background="#FFFFFF"
-            borderRadius="4px"
-            mb="10px"
-            _focus={{
-              boxShadow: 'none',
-            }}
+            maxWidth="320px"
+            cursor="pointer"
+            onClick={() => setOpening(true)}
           >
-            <Input
+            <Textarea
+              width="100%"
+              height="60px"
+              minHeight="60px"
+              background="#FFFFFF"
+              borderRadius="5px"
               id="address"
               name="address"
               value={value}
@@ -70,7 +75,6 @@ const SortBy: FC<SortByProps> = ({ injectedAccounts, handleClick, value }) => {
               _focus={{
                 boxShadow: 'none',
                 color: '#000000',
-                border: '1px solid #000000',
               }}
               _after={{
                 boxShadow: 'none',
@@ -83,23 +87,8 @@ const SortBy: FC<SortByProps> = ({ injectedAccounts, handleClick, value }) => {
                 fontSize: '12px',
               }}
             />
-            <InputRightAddon
-              p="0 15px"
-              cursor="pointer"
-              height="40px"
-              background="#F4F4F4"
-              borderRadius="0px 4px 4px 0px"
-              border="1px solid #E5E5E5"
-              fontSize="14px"
-              fontFamily="TTHoves-Regular, TTHoves"
-              fontWeight="400"
-              color="#999999"
-              lineHeight="14px"
-              // eslint-disable-next-line react/no-children-prop
-              children="Switch"
-              onClick={() => setOpening(true)}
-            />
-          </InputGroup> : null}
+          </Flex>
+          : null}
       </Flex>
       <AlertDialog
         motionPreset='slideInBottom'

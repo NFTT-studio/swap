@@ -10,6 +10,8 @@ import {
   Input,
   InputRightAddon,
   useToast,
+  Image,
+  Textarea,
 } from '@chakra-ui/react';
 import {
   useFormik,
@@ -21,14 +23,20 @@ import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
 import { encodeAddress } from '@polkadot/util-crypto';
 import Login from '../../components/Login';
-import { parseMoneyText } from '../../utils/fomart';
+import { moneyDelete } from '../../utils/fomart';
+import NFTMart from '../../assets/images/NFTMart.png';
+import arrow from '../../assets/images/arrow.png';
 
 
-const Home = () => {
+interface Props {
+  setIndex: React.Dispatch<React.SetStateAction<string | null>>;
+}
+const Home = ({ setIndex }: Props) => {
   const toast = useToast();
   const [injected, setInjected] = useState(false);
   const [free, setFres] = useState("");
   const [value, setValue] = useState("");
+  const [Tx, setTx] = useState("");
   const [injectedAccounts, setInjectedAccounts] = useState<InjectedAccountWithMeta[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const schema = Yup.object().shape({
@@ -96,6 +104,7 @@ const Home = () => {
                 position: 'top',
                 duration: 3000,
               });
+              setTx(result.txHash.toString())
               setIsSubmitting(false);
             }
           },
@@ -125,7 +134,6 @@ const Home = () => {
         onSubmit={formik.handleSubmit}
         style={{
           width: "100%",
-          maxWidth: "580px",
         }}
       >
         <Flex
@@ -133,81 +141,175 @@ const Home = () => {
           w="100%"
           p="30px"
           flexDirection="column"
+          alignItems="center"
           background="#FFFFFF"
-          borderRadius="4px"
+          borderRadius="5px"
           border="1px solid #E5E5E5"
         >
-          <Flex mb="30px" h="21px" alignItems="center" justifyContent="center">
-            <Text
-              fontSize="1.5rem"
-            >
-              NMT Substrate to Evm
-            </Text>
-          </Flex>
           {!injected ?
-            <Flex mb="34px" alignItems="center" justifyContent="center">
+            <Flex width="100%" mb="25px" alignItems="center" justifyContent="center">
               <Link
+                maxWidth="714px"
+                width="100%"
                 textDecoration="none"
                 target="blank"
+                _hover={{
+                  textDecoration: "none",
+                }}
                 href="https://docs.google.com/forms/d/1WCNeiufW1XxLsyme7dJUys7y7t-XJRyp1nQR0bhnvVQ"
               >
                 <Button
+                  textDecoration="none"
                   background='#f50057'
+                  maxWidth="714px"
                   width="100%"
                   // whiteSpace="normal"
-                  height="66px"
+                  height="36px"
                   color="#FFFFFF"
                   fontSize="18px"
                   fontFamily="TTHoves-Medium, TTHoves"
                   fontWeight="500"
                   _hover={{
+                    textDecoration: "none",
                     background: '#c51162',
                   }}
                 >
-                  {`Please click and install Polkadot {.js}`}
-                  <br />
-                  {`https://polkadot.js.org/extension/ `}
+                  {`please install polkdot{.js}`}
                 </Button>
               </Link>
             </Flex>
             : null}
-          {injected && injectedAccounts.length === 0 ?
-            <Flex mb="34px" alignItems="center" justifyContent="center">
-              <Button
-                background='#f50057'
-                width="100%"
-                whiteSpace="normal"
-                height="66px"
-                color="#FFFFFF"
-                fontSize="18px"
-                fontFamily="TTHoves-Medium, TTHoves"
-                fontWeight="500"
-                _hover={{
-                  background: '#c51162',
-                }}
+          <Flex width="100%" mb="30px" alignItems="center" justifyContent="center">
+            <Flex
+              flexDirection="column"
+              alignItems="center"
+            >
+              <Flex
+                mb="25px"
               >
-                {`Please use Polkadot extension create or import your account`}
-              </Button>
+                <Image
+                  src={NFTMart}
+                />
+              </Flex>
+              <Text
+                w="90px"
+                textAlign="center"
+              >
+                NMT Native
+              </Text>
             </Flex>
-            : null}
-          {injected && injectedAccounts.length > 0 ?
-            <Login
-              injectedAccounts={injectedAccounts}
-              handleClick={handleClick}
-              value={value}
-            />
-            : null}
-          <InputGroup
-            width="100%"
-            height="40px"
-            background="#FFFFFF"
-            borderRadius="4px"
-            mb="10px"
-            _focus={{
-              boxShadow: 'none',
-            }}
+            <Flex
+              ml="44%"
+              flexDirection="column"
+              alignItems="center"
+            >
+              <Flex
+                mb="25px"
+                position="relative"
+              >
+                <Image
+                  src={NFTMart}
+                />
+                <Text
+                  cursor=""
+                  height="26px"
+                  m="0px"
+                  p="0px"
+                  position="absolute"
+                  right="3px"
+                  bottom="0"
+                  textAlign="center"
+                  color="#FF0707"
+                  fontWeight='bold'
+                  fontSize="20px"
+                >
+                  E
+                </Text>
+              </Flex>
+              <Text
+                w="90px"
+                textAlign="center"
+              >
+                NMT EVM
+              </Text>
+            </Flex>
+          </Flex>
+          <Flex
+            w="100%"
+            alignItems="center" justifyContent="center"
           >
-            <Input
+            {injected && injectedAccounts.length === 0 ?
+              <Flex mb="34px" alignItems="center" justifyContent="center">
+                <Button
+                  width="100%"
+                  whiteSpace="normal"
+                  height="66px"
+                  color="#FFFFFF"
+                  fontSize="18px"
+                  fontFamily="TTHoves-Medium, TTHoves"
+                  fontWeight="500"
+                  background='#f50057'
+                  _hover={{
+                    background: '#c51162',
+                  }}
+                >
+                  {`Please use Polkadot extension create or import your account`}
+                </Button>
+              </Flex>
+              : null}
+            {injected && injectedAccounts.length > 0 ?
+              <Login
+                injectedAccounts={injectedAccounts}
+                handleClick={handleClick}
+                value={value}
+              />
+              : null}
+            <Flex
+              p="2%"
+              width="20%"
+              flexDirection="column"
+              alignItems="center"
+            >
+              <Flex
+                position="relative"
+              >
+                <Image
+                  src={arrow}
+                />
+                <Text
+                  background='#f50057'
+                  _hover={{
+                    background: '#c51162',
+                  }}
+                  cursor="pointer"
+                  w="120px"
+                  h="40px"
+                  lineHeight="40px"
+                  color="#FFFFFF"
+                  fontSize="18px"
+                  fontFamily="TTHoves-Medium, TTHoves"
+                  fontWeight="500"
+                  m="0px"
+                  position="absolute"
+                  left="calc(50% - 65px)"
+                  top="-40px"
+                  textAlign="center"
+                  onClick={() => {
+                    localStorage.setItem('defaultIndex', '1')
+                    setIndex("1");
+                  }}
+                >
+                  switch
+                </Text>
+              </Flex>
+            </Flex>
+            <Textarea
+              width="100%"
+              maxWidth="320px"
+              height="60px"
+              minHeight="60px"
+              background="#FFFFFF"
+              borderRadius="5px"
               id="Gerald"
               name="Gerald"
               value={formik.values.Gerald}
@@ -215,12 +317,10 @@ const Home = () => {
               fontSize="16px"
               fontFamily="TTHoves-Regular, TTHoves"
               fontWeight="400"
-              lineHeight="14px"
               color="#000000"
               _focus={{
                 boxShadow: 'none',
                 color: '#000000',
-                border: '1px solid #000000',
               }}
               _after={{
                 boxShadow: 'none',
@@ -230,19 +330,21 @@ const Home = () => {
               placeholder="To Native Address"
               _placeholder={{
                 color: '#999999',
-                fontSize: '12px',
+                fontSize: '16px',
               }}
             />
-          </InputGroup>
+          </Flex>
+
+
           {formik.errors.Gerald && formik.touched.Gerald ? (
             <div style={{ color: 'red' }}>{formik.errors.Gerald}</div>
           ) : null}
           <InputGroup
             width="100%"
-            height="40px"
+            maxWidth="320px"
             background="#FFFFFF"
-            borderRadius="4px"
-            mb="10px"
+            borderRadius="5px"
+            m="20px 0"
             _focus={{
               boxShadow: 'none',
 
@@ -268,7 +370,7 @@ const Home = () => {
                 color: '#000000',
                 border: '1px solid #000000',
               }}
-              placeholder={`Remaining amount ${free}`}
+              placeholder={`Remaining amount ${free && moneyDelete(free)}`}
               _placeholder={{
                 color: '#999999',
                 fontSize: '12px',
@@ -278,7 +380,7 @@ const Home = () => {
               width="72px"
               height="40px"
               background="#F4F4F4"
-              borderRadius="0px 4px 4px 0px"
+              borderRadius="0px 5px 5px 0px"
               border="1px solid #E5E5E5"
               fontSize="14px"
               fontFamily="TTHoves-Regular, TTHoves"
@@ -292,7 +394,7 @@ const Home = () => {
           {formik.errors.amount && formik.touched.amount ? (
             <div style={{ color: 'red' }}>{formik.errors.amount}</div>
           ) : null}
-          <Flex w="100%" justifyContent="center" pt="10px">
+          <Flex w="100%" justifyContent="center" >
             <Button
               isLoading={isSubmitting}
               bg="#000000"
@@ -301,7 +403,7 @@ const Home = () => {
               fontFamily="TTHoves-Medium, TTHoves"
               fontWeight="500"
               lineHeight="20px"
-              borderRadius="4px"
+              borderRadius="5px"
               type="submit"
               _hover={{
                 background: '#000000 !important',
@@ -310,8 +412,38 @@ const Home = () => {
               SWAP
             </Button>
           </Flex>
+          {Tx ?
+            <Link
+              textDecoration="none"
+              target="blank"
+              href={`https://scan.nftmart.io/mainnet/analytics/search/${Tx}`}
+              _hover={{
+                textDecoration: "none",
+              }}
+            >
+              <Text
+                mt="20px"
+                fontSize="20px"
+                fontFamily="PingFangSC-Regular, PingFang SC"
+                fontWeight="Bold"
+                color="#000000"
+              >
+                Tx: {Tx}
+              </Text>
+            </Link> : null
+          }
+
+          <Text
+            mt="20px"
+            fontSize="40px"
+            fontFamily="PingFangSC-Regular, PingFang SC"
+            fontWeight="Bold"
+            color="#000000"
+          >
+            in transaction...
+          </Text>
           <Flex
-            mt="10px"
+            mt="20px"
             width="100%"
             flexFlow="wrap"
             justifyContent="flex-start"

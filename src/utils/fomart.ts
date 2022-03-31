@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable import/prefer-default-export */
 import BigNumber from 'bignumber.js';
 type NumberValue = string | number;
@@ -24,3 +25,14 @@ export const parseMoneyText = (text: string) => {
   const normalizedMoney = toBigNumber(moneyText).times(10 ** baseOption.power);
   return { value: normalizedMoney, unit };
 };
+export  function moneyDelete(num:string){
+  if(num&&num!=undefined&&num!=null){
+    let _num = num;
+    _num = _num.toString();
+    _num = _num.replace(/,/gi,'');
+    return (Number(_num)/1000000000000).toFixed(2)
+  }else{
+    
+     return (Number(num)/1000000000000).toFixed(2)
+  }
+}

@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 /* eslint-disable no-nested-ternary */
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Tabs,
   TabList,
@@ -11,15 +11,20 @@ import {
 import MainContainer from '../../MainContainer';
 import PolkaSwap from '../polkaSwap';
 import EvmSwap from '../evmSwap';
-
-
+import NFTMart from '../../assets/images/NFTMart.png';
 
 const Home = () => {
-  const defaultIndex = localStorage.getItem('defaultIndex');
+  const [defaultIndex, setIndex] = useState(localStorage.getItem('defaultIndex'));
+
   return (
     <>
       <MainContainer title={"NFTMart"}>
-        <Tabs
+        {defaultIndex === "0" ?
+          <PolkaSwap setIndex={setIndex} /> : null}
+        {defaultIndex === "1" ?
+          <EvmSwap setIndex={setIndex} /> : null}
+
+        {/* <Tabs
           maxW="620px"
           w="100%"
           isFitted
@@ -45,13 +50,13 @@ const Home = () => {
           </TabList>
           <TabPanels>
             <TabPanel>
-              <PolkaSwap />
+              
             </TabPanel>
             <TabPanel>
               <EvmSwap />
             </TabPanel>
           </TabPanels>
-        </Tabs>
+        </Tabs> */}
       </MainContainer>
     </>
   );

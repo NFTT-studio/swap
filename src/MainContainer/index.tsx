@@ -25,10 +25,11 @@ const MainContainer = ({ children, title }: Props) => {
         maxWidth="100vw"
         minHeight="100vh"
         w="100%"
-        p="80px 20px 0 20px"
+        p="0px 20px 0 20px"
         boxSizing="border-box"
         flexDirection="column"
         alignItems="center"
+        justifyContent="center"
       >
         {children}
       </Flex>

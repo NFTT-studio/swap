@@ -10,20 +10,27 @@ import {
   Input,
   InputRightAddon,
   useToast,
+  Image,
+  Textarea,
 } from '@chakra-ui/react';
 import {
   useFormik,
 } from 'formik';
 import * as Yup from 'yup';
 import { withdrawBalance } from '../contractUtil/api/EvmTosubstrate';
+import { getBalance } from '../contractUtil/api/getBalance';
 import detectEthereumProvider from '@metamask/detect-provider';
-import { ethers } from "ethers"
+import NFTMart from '../../assets/images/NFTMart.png';
+import arrow from '../../assets/images/arrow.png';
 
 
-const Home = () => {
+interface Props {
+  setIndex: React.Dispatch<React.SetStateAction<string | null>>;
+}
+const Home = ({ setIndex }: Props) => {
   const toast = useToast();
+  const [Tx, setTx] = useState("");
   const defaultIndex = localStorage.getItem('defaultIndex');
-
   type EthereumProviderEip1193 = {
     request: (args: {
       method: string
@@ -34,6 +41,7 @@ const Home = () => {
   const [isProvider, setIsProvider] = useState<EthereumProviderEip1193>();
   const [chainId, setChainId] = useState("");
   const [currentAccount, setCurrentAccount] = useState("");
+  const [free, setFres] = useState<number>(0);
   const handleChainChanged = (_chainId: any) => {
     window.location.reload();
 
@@ -82,6 +90,7 @@ const Home = () => {
       console.info(switchError);
     }
   }
+
   useEffect(() => {
     const initExtension = async () => {
       const provider: any = await detectEthereumProvider();
@@ -100,6 +109,18 @@ const Home = () => {
 
     initExtension();
   }, []);
+
+  useEffect(() => {
+    const init = async () => {
+      console.log(isProvider, chainId === '0x2f9f', currentAccount);
+      if (isProvider && currentAccount) {
+        let nmtBalance = await getBalance({ isProvider, currentAccount });
+        console.log(nmtBalance, isProvider, currentAccount);
+        setFres(nmtBalance || 0);
+      }
+    };
+    init();
+  }, [currentAccount, Tx, isProvider]);
   useEffect(() => {
     const initExtension = async () => {
       await requestAccount();
@@ -153,6 +174,7 @@ const Home = () => {
               description: `${result.toString()}`,
               isClosable: true,
             });
+            setTx(result.toString());
             setIsSubmitting(false);
           },
           error: (error) => {
@@ -178,7 +200,6 @@ const Home = () => {
         onSubmit={formik.handleSubmit}
         style={{
           width: "100%",
-          maxWidth: "580px",
         }}
       >
         <Flex
@@ -186,49 +207,211 @@ const Home = () => {
           w="100%"
           p="30px"
           flexDirection="column"
+          alignItems="center"
           background="#FFFFFF"
-          borderRadius="4px"
+          borderRadius="5px"
           border="1px solid #E5E5E5"
         >
-          {chainId !== '0x2f9f' ?
-            <Flex mb="34px" alignItems="center" justifyContent="center">
-              <Button
-                onClick={_handleSwithChain}
-                background='#f50057'
-                width="100%"
-                // whiteSpace="normal"
-                height="40px"
-                color="#FFFFFF"
-                fontSize="18px"
-                fontFamily="TTHoves-Medium, TTHoves"
-                fontWeight="500"
-                _hover={{
-                  background: '#c51162',
-                }}
-              >
-                {`Please Select NFTMart EVM Testnet First`}
-              </Button>
-            </Flex>
-            : null}
-          <Flex mb="30px" h="21px" alignItems="center" justifyContent="center">
-            <Text
-              fontSize="1.5rem"
-            >
-              NMT Evm to Substrate
-            </Text>
-          </Flex>
           {!install ?
-            <Flex mb="34px" alignItems="center" justifyContent="center">
+            <Flex width="100%" mb="25px" alignItems="center" justifyContent="center">
               <Link
+                maxWidth="714px"
+                width="100%"
                 textDecoration="none"
                 target="blank"
+                _hover={{
+                  textDecoration: "none",
+                }}
                 href="https://metamask.io/download.html"
               >
                 <Button
+                  textDecoration="none"
                   background='#f50057'
+                  maxWidth="714px"
                   width="100%"
                   // whiteSpace="normal"
-                  height="66px"
+                  height="36px"
+                  color="#FFFFFF"
+                  fontSize="18px"
+                  fontFamily="TTHoves-Medium, TTHoves"
+                  fontWeight="500"
+                  _hover={{
+                    textDecoration: "none",
+                    background: '#c51162',
+                  }}
+                >
+                  {`please install metamask`}
+                </Button>
+              </Link>
+            </Flex>
+            : null}
+          <Flex width="100%" mb="30px" alignItems="center" justifyContent="center">
+            <Flex
+              flexDirection="column"
+              alignItems="center"
+            >
+              <Flex
+                mb="25px"
+              >
+                <Image
+                  src={NFTMart}
+                />
+              </Flex>
+              <Text
+                w="90px"
+                textAlign="center"
+              >
+                NMT Native
+              </Text>
+            </Flex>
+            <Flex
+              ml="44%"
+              flexDirection="column"
+              alignItems="center"
+            >
+              <Flex
+                mb="25px"
+                position="relative"
+              >
+                <Image
+                  src={NFTMart}
+                />
+                <Text
+                  cursor=""
+                  height="26px"
+                  m="0px"
+                  p="0px"
+                  position="absolute"
+                  right="3px"
+                  bottom="0"
+                  textAlign="center"
+                  color="#FF0707"
+                  fontWeight='bold'
+                  fontSize="20px"
+                >
+                  E
+                </Text>
+              </Flex>
+              <Text
+                w="90px"
+                textAlign="center"
+              >
+                NMT EVM
+              </Text>
+            </Flex>
+          </Flex>
+
+          <Flex
+            w="100%"
+            alignItems="center" justifyContent="center"
+          >
+            <Textarea
+              width="100%"
+              maxWidth="320px"
+              height="60px"
+              minHeight="60px"
+              background="#FFFFFF"
+              borderRadius="5px"
+              id="receiver"
+              name="receiver"
+              value={formik.values.receiver}
+              onChange={formik.handleChange}
+              fontSize="16px"
+              fontFamily="TTHoves-Regular, TTHoves"
+              fontWeight="400"
+              color="#000000"
+              _focus={{
+                boxShadow: 'none',
+                color: '#000000',
+              }}
+              _after={{
+                boxShadow: 'none',
+                color: '#000000',
+                border: '1px solid #000000',
+              }}
+              placeholder="To Native Address"
+              _placeholder={{
+                color: '#999999',
+                fontSize: '16px',
+              }}
+            />
+            {formik.errors.receiver && formik.touched.receiver ? (
+              <div style={{ color: 'red' }}>{formik.errors.receiver}</div>
+            ) : null}
+            <Flex
+              p="2%"
+              width="20%"
+              flexDirection="column"
+              alignItems="center"
+            >
+              <Flex
+                position="relative"
+              >
+                <Image
+                  transform="rotate(180deg)"
+                  src={arrow}
+                />
+                <Text
+                  background='#f50057'
+                  _hover={{
+                    background: '#c51162',
+                  }}
+                  cursor="pointer"
+                  w="120px"
+                  h="40px"
+                  lineHeight="40px"
+                  color="#FFFFFF"
+                  fontSize="18px"
+                  fontFamily="TTHoves-Medium, TTHoves"
+                  fontWeight="500"
+                  m="0px"
+                  position="absolute"
+                  left="calc(50% - 65px)"
+                  top="-40px"
+                  textAlign="center"
+                  onClick={() => {
+                    localStorage.setItem('defaultIndex', '0')
+                    setIndex("0");
+                  }}
+                >
+                  switch
+                </Text>
+              </Flex>
+            </Flex>
+            {install && currentAccount === "" ?
+              <Flex
+                width="100%"
+                maxWidth="320px"
+                alignItems="center" justifyContent="center">
+                <Button
+                  background='#f50057'
+                  width="100%"
+                  height="60px"
+                  whiteSpace="normal"
+                  color="#FFFFFF"
+                  fontSize="18px"
+                  fontFamily="TTHoves-Medium, TTHoves"
+                  fontWeight="500"
+                  _hover={{
+                    background: '#c51162',
+                  }}
+                  onClick={() => _handleConnectClick()}
+                >
+                  {`Connect Wallet`}
+                </Button>
+              </Flex>
+              : null}
+            {install && chainId !== '0x2f9f' ?
+              <Flex
+                width="100%"
+                maxWidth="320px"
+                alignItems="center" justifyContent="center">
+                <Button
+                  onClick={_handleSwithChain}
+                  background='#f50057'
+                  width="100%"
+                  height="60px"
+                  whiteSpace="normal"
                   color="#FFFFFF"
                   fontSize="18px"
                   fontFamily="TTHoves-Medium, TTHoves"
@@ -237,45 +420,18 @@ const Home = () => {
                     background: '#c51162',
                   }}
                 >
-                  {`Please click and install MetaMask!`}
-                  <br />
-                  {`https://metamask.io/download.html `}
+                  {`Please Select NFTMart EVM Testnet First`}
                 </Button>
-              </Link>
-            </Flex>
-            : null}
-          {install && currentAccount === "" ?
-            <Flex mb="34px" alignItems="center" justifyContent="center">
-              <Button
-                background='#f50057'
+              </Flex>
+              : null}
+            {install && currentAccount !== "" && chainId === '0x2f9f' ?
+              <Textarea
+                maxWidth="320px"
                 width="100%"
-                whiteSpace="normal"
-                height="66px"
-                color="#FFFFFF"
-                fontSize="18px"
-                fontFamily="TTHoves-Medium, TTHoves"
-                fontWeight="500"
-                onClick={() => _handleConnectClick()}
-                _hover={{
-                  background: '#c51162',
-                }}
-              >
-                {`Connect Wallet`}
-              </Button>
-            </Flex>
-            : null}
-          {install && currentAccount !== "" ?
-            <InputGroup
-              width="100%"
-              height="40px"
-              background="#FFFFFF"
-              borderRadius="4px"
-              mb="10px"
-              _focus={{
-                boxShadow: 'none',
-              }}
-            >
-              <Input
+                height="60px"
+                minHeight="60px"
+                background="#FFFFFF"
+                borderRadius="5px"
                 id="address"
                 name="address"
                 value={currentAccount}
@@ -288,7 +444,6 @@ const Home = () => {
                 _focus={{
                   boxShadow: 'none',
                   color: '#000000',
-                  border: '1px solid #000000',
                 }}
                 _after={{
                   boxShadow: 'none',
@@ -301,54 +456,17 @@ const Home = () => {
                   fontSize: '12px',
                 }}
               />
-            </InputGroup>
-            : null}
+              : null}
+
+          </Flex>
+
+
           <InputGroup
             width="100%"
-            height="40px"
+            maxWidth="320px"
             background="#FFFFFF"
-            borderRadius="4px"
-            mb="10px"
-            _focus={{
-              boxShadow: 'none',
-            }}
-          >
-            <Input
-              id="receiver"
-              name="receiver"
-              value={formik.values.receiver}
-              onChange={formik.handleChange}
-              fontSize="16px"
-              fontFamily="TTHoves-Regular, TTHoves"
-              fontWeight="400"
-              lineHeight="14px"
-              color="#000000"
-              _focus={{
-                boxShadow: 'none',
-                color: '#000000',
-                border: '1px solid #000000',
-              }}
-              _after={{
-                boxShadow: 'none',
-                color: '#000000',
-                border: '1px solid #000000',
-              }}
-              placeholder="To Native Address"
-              _placeholder={{
-                color: '#999999',
-                fontSize: '12px',
-              }}
-            />
-          </InputGroup>
-          {formik.errors.receiver && formik.touched.receiver ? (
-            <div style={{ color: 'red' }}>{formik.errors.receiver}</div>
-          ) : null}
-          <InputGroup
-            width="100%"
-            height="40px"
-            background="#FFFFFF"
-            borderRadius="4px"
-            mb="10px"
+            borderRadius="5px"
+            m="20px 0"
             _focus={{
               boxShadow: 'none',
 
@@ -374,7 +492,7 @@ const Home = () => {
                 color: '#000000',
                 border: '1px solid #000000',
               }}
-              placeholder="Swap Amount"
+              placeholder={`Remaining amount ${free && free}`}
               _placeholder={{
                 color: '#999999',
                 fontSize: '12px',
@@ -398,7 +516,7 @@ const Home = () => {
           {formik.errors.amount && formik.touched.amount ? (
             <div style={{ color: 'red' }}>{formik.errors.amount}</div>
           ) : null}
-          <Flex w="100%" justifyContent="center" pt="10px">
+          <Flex w="100%" justifyContent="center" >
             <Button
               isLoading={isSubmitting}
               bg="#000000"
@@ -417,8 +535,38 @@ const Home = () => {
               SWAP
             </Button>
           </Flex>
+          {Tx ?
+            <Link
+              textDecoration="none"
+              target="blank"
+              href={`https://scan.nftmart.io/mainnet/analytics/search/${Tx}`}
+              _hover={{
+                textDecoration: "none",
+              }}
+            >
+              <Text
+                mt="20px"
+                fontSize="20px"
+                fontFamily="PingFangSC-Regular, PingFang SC"
+                fontWeight="Bold"
+                color="#000000"
+              >
+                Tx: {Tx}
+              </Text>
+            </Link> : null
+          }
+
+          <Text
+            mt="20px"
+            fontSize="40px"
+            fontFamily="PingFangSC-Regular, PingFang SC"
+            fontWeight="Bold"
+            color="#000000"
+          >
+            in transaction...
+          </Text>
           <Flex
-            mt="10px"
+            mt="20px"
             width="100%"
             flexFlow="wrap"
             justifyContent="flex-start"
