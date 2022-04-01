@@ -3,7 +3,6 @@
 import { WsProvider, ApiPromise, Keyring } from '@polkadot/api';
 import { Client } from 'rpc-websockets';
 import { NODE_URL, SS58_FORMAT, TYPES } from '../constants';
-import { web3Enable, web3Accounts, web3FromSource } from '@polkadot/extension-dapp';
 
 interface PolkaSDKInitOptions {
   ss58Format: number

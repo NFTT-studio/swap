@@ -17,8 +17,8 @@ import {
   useFormik,
 } from 'formik';
 import * as Yup from 'yup';
-import { getBalance } from '../polkaSDK/api/getBalance';
-import { substrateToEvm } from '../polkaSDK/api/substrateToEvm';
+import { getBalance } from '../../polkaSDK/api/getBalance';
+import { substrateToEvm } from '../../polkaSDK/api/substrateToEvm';
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
 import { encodeAddress } from '@polkadot/util-crypto';

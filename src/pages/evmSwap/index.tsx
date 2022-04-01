@@ -17,8 +17,8 @@ import {
   useFormik,
 } from 'formik';
 import * as Yup from 'yup';
-import { withdrawBalance } from '../contractUtil/api/EvmTosubstrate';
-import { getBalance } from '../contractUtil/api/getBalance';
+import { withdrawBalance } from '../../contractUtil/api/EvmTosubstrate';
+import { getBalance } from '../../contractUtil/api/getBalance';
 import detectEthereumProvider from '@metamask/detect-provider';
 import NFTMart from '../../assets/images/NFTMart.png';
 import arrow from '../../assets/images/arrow.png';
