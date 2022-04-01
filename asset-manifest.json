@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.js": "./https://nftt-studio.github.io/swap/static/js/main.02898ee8.js",
-    "static/js/377.26d52252.chunk.js": "./https://nftt-studio.github.io/swap/static/js/377.26d52252.chunk.js",
-    "index.html": "./https://nftt-studio.github.io/swap/index.html",
-    "static/media/index.cjs": "./https://nftt-studio.github.io/swap/static/media/index.f2b6f7ffc9a430272d20.cjs",
-    "main.02898ee8.js.map": "./https://nftt-studio.github.io/swap/static/js/main.02898ee8.js.map",
-    "377.26d52252.chunk.js.map": "./https://nftt-studio.github.io/swap/static/js/377.26d52252.chunk.js.map"
+    "main.js": "/swap/static/js/main.fdc02cbe.js",
+    "static/js/377.26d52252.chunk.js": "/swap/static/js/377.26d52252.chunk.js",
+    "index.html": "/swap/index.html",
+    "static/media/index.cjs": "/swap/static/media/index.f2b6f7ffc9a430272d20.cjs",
+    "main.fdc02cbe.js.map": "/swap/static/js/main.fdc02cbe.js.map",
+    "377.26d52252.chunk.js.map": "/swap/static/js/377.26d52252.chunk.js.map"
   },
   "entrypoints": [
-    "static/js/main.02898ee8.js"
+    "static/js/main.fdc02cbe.js"
   ]
 }
