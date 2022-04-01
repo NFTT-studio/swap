@@ -1,8 +1,7 @@
-import { txLog } from '../../../utils/txLog';
 import {
   ethers,
   abi,
-} from "../lib";
+} from "../common";
 import {u8aToHex} from '@polkadot/util';
 import { decodeAddress } from '@polkadot/util-crypto';
   
@@ -11,7 +10,6 @@ const options = {
   gasLimit: 3000000,
   gasPrice: 10000,
 };
-const precompile = "0x0000000000000000000000000000000000000801";
 
 type EthereumProviderEip1193 = {
   request: (args: {

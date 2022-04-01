@@ -33,7 +33,7 @@ interface Props {
 }
 const Home = ({ setIndex }: Props) => {
   const toast = useToast();
-  const [injected, setInjected] = useState(false);
+  const [injected, setInjected] = useState(true);
   const [free, setFres] = useState(0);
   const [value, setValue] = useState("");
   const [Tx, setTx] = useState("");

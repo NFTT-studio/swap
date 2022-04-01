@@ -37,7 +37,7 @@ const Home = ({ setIndex }: Props) => {
       params?: unknown[] | object
     }) => Promise<unknown>
   }
-  const [install, setInstall] = useState(false);
+  const [install, setInstall] = useState(true);
   const [isProvider, setIsProvider] = useState<EthereumProviderEip1193>();
   const [chainId, setChainId] = useState("");
   const [currentAccount, setCurrentAccount] = useState("");
