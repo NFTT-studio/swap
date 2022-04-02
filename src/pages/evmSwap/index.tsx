@@ -11,7 +11,6 @@ import {
   InputRightAddon,
   useToast,
   Image,
-  Textarea,
 } from '@chakra-ui/react';
 import {
   useFormik,
@@ -25,7 +24,7 @@ import arrow from '../../assets/images/arrow.png';
 
 
 interface Props {
-  setIndex: React.Dispatch<React.SetStateAction<string | null>>;
+  setIndex: React.Dispatch<React.SetStateAction<string>>;
 }
 const Home = ({ setIndex }: Props) => {
   const toast = useToast();
@@ -39,7 +38,7 @@ const Home = ({ setIndex }: Props) => {
   }
   const [install, setInstall] = useState(true);
   const [isProvider, setIsProvider] = useState<EthereumProviderEip1193>();
-  const [chainId, setChainId] = useState("");
+  const [chainId, setChainId] = useState("0x2f9f");
   const [currentAccount, setCurrentAccount] = useState("");
   const [free, setFres] = useState<number>(0);
   const handleChainChanged = (_chainId: any) => {
@@ -48,7 +47,6 @@ const Home = ({ setIndex }: Props) => {
     // this.setState({chainId:_chainId});
   }
   const handleAccountsChanged = async (accounts: any) => {
-    console.log(accounts);
     if (accounts[0]) {
       setCurrentAccount(accounts[0])
       console.log(accounts[0])
@@ -66,7 +64,6 @@ const Home = ({ setIndex }: Props) => {
     try {
       if (isProvider) {
         let accounts = await isProvider.request({ method: 'eth_requestAccounts' });
-        console.log(accounts);
         await handleAccountsChanged(accounts);
       }
     } catch (error: any) {
@@ -112,7 +109,6 @@ const Home = ({ setIndex }: Props) => {
 
   useEffect(() => {
     const init = async () => {
-      console.log(isProvider, chainId === '0x2f9f', currentAccount);
       if (isProvider && currentAccount) {
         let nmtBalance = await getBalance({ isProvider, currentAccount });
         console.log(nmtBalance, isProvider, currentAccount);
@@ -122,12 +118,12 @@ const Home = ({ setIndex }: Props) => {
     init();
   }, [currentAccount, Tx, isProvider]);
   useEffect(() => {
-    const initExtension = async () => {
-      await requestAccount();
-    };
-    if (defaultIndex === "1") {
-      initExtension();
-    }
+    // const initExtension = async () => {
+    //   await requestAccount();
+    // };
+    // if (defaultIndex === "1") {
+    //   initExtension();
+    // }
   }, [isProvider, defaultIndex]);
   const _handleConnectClick = async () => {
     if (!isProvider) {
@@ -245,6 +241,37 @@ const Home = ({ setIndex }: Props) => {
               </Link>
             </Flex>
             : null}
+          {install && chainId !== '0x2f9f' ?
+            <Flex
+              mb="25px"
+              width="100%"
+              maxWidth="714px"
+              textDecoration="none"
+              _hover={{
+                textDecoration: "none",
+              }}
+              alignItems="center"
+              justifyContent="center">
+              <Button
+                textDecoration="none"
+                background='#f50057'
+                maxWidth="714px"
+                width="100%"
+                // whiteSpace="normal"
+                height="36px"
+                color="#FFFFFF"
+                fontSize="18px"
+                fontFamily="TTHoves-Medium, TTHoves"
+                fontWeight="500"
+                _hover={{
+                  textDecoration: "none",
+                  background: '#c51162',
+                }}
+              >
+                {`Please Select NFTMart EVM Testnet First`}
+              </Button>
+            </Flex>
+            : null}
           <Flex width="100%" mb="30px" alignItems="center" justifyContent="center">
             <Flex
               flexDirection="column"
@@ -305,9 +332,9 @@ const Home = ({ setIndex }: Props) => {
             w="100%"
             alignItems="center" justifyContent="center"
           >
-            <Textarea
+            <Input
               width="100%"
-              maxWidth="320px"
+              maxWidth="470px"
               height="60px"
               minHeight="60px"
               background="#FFFFFF"
@@ -316,7 +343,7 @@ const Home = ({ setIndex }: Props) => {
               name="receiver"
               value={formik.values.receiver}
               onChange={formik.handleChange}
-              fontSize="16px"
+              fontSize="14px"
               fontFamily="TTHoves-Regular, TTHoves"
               fontWeight="400"
               color="#000000"
@@ -332,7 +359,7 @@ const Home = ({ setIndex }: Props) => {
               placeholder="To Native Address"
               _placeholder={{
                 color: '#999999',
-                fontSize: '16px',
+                fontSize: '14px',
               }}
             />
             {formik.errors.receiver && formik.touched.receiver ? (
@@ -357,7 +384,7 @@ const Home = ({ setIndex }: Props) => {
                     background: '#c51162',
                   }}
                   cursor="pointer"
-                  w="120px"
+                  w="80px"
                   h="40px"
                   lineHeight="40px"
                   color="#FFFFFF"
@@ -366,7 +393,7 @@ const Home = ({ setIndex }: Props) => {
                   fontWeight="500"
                   m="0px"
                   position="absolute"
-                  left="calc(50% - 65px)"
+                  left="calc(50% - 40px)"
                   top="-40px"
                   textAlign="center"
                   onClick={() => {
@@ -381,7 +408,7 @@ const Home = ({ setIndex }: Props) => {
             {install && currentAccount === "" ?
               <Flex
                 width="100%"
-                maxWidth="320px"
+                maxWidth="470px"
                 alignItems="center" justifyContent="center">
                 <Button
                   background='#f50057'
@@ -401,32 +428,9 @@ const Home = ({ setIndex }: Props) => {
                 </Button>
               </Flex>
               : null}
-            {install && chainId !== '0x2f9f' ?
-              <Flex
-                width="100%"
-                maxWidth="320px"
-                alignItems="center" justifyContent="center">
-                <Button
-                  onClick={_handleSwithChain}
-                  background='#f50057'
-                  width="100%"
-                  height="60px"
-                  whiteSpace="normal"
-                  color="#FFFFFF"
-                  fontSize="18px"
-                  fontFamily="TTHoves-Medium, TTHoves"
-                  fontWeight="500"
-                  _hover={{
-                    background: '#c51162',
-                  }}
-                >
-                  {`Please Select NFTMart EVM Testnet First`}
-                </Button>
-              </Flex>
-              : null}
             {install && currentAccount !== "" && chainId === '0x2f9f' ?
-              <Textarea
-                maxWidth="320px"
+              <Input
+                maxWidth="470px"
                 width="100%"
                 height="60px"
                 minHeight="60px"
@@ -477,7 +481,7 @@ const Home = ({ setIndex }: Props) => {
               name="amount"
               value={formik.values.amount}
               onChange={formik.handleChange}
-              fontSize="16px"
+              fontSize="14px"
               fontFamily="TTHoves-Regular, TTHoves"
               fontWeight="400"
               lineHeight="14px"

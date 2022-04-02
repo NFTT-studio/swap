@@ -11,7 +11,6 @@ import {
   InputRightAddon,
   useToast,
   Image,
-  Textarea,
 } from '@chakra-ui/react';
 import {
   useFormik,
@@ -29,12 +28,13 @@ import arrow from '../../assets/images/arrow.png';
 
 
 interface Props {
-  setIndex: React.Dispatch<React.SetStateAction<string | null>>;
+  setIndex: React.Dispatch<React.SetStateAction<string>>;
 }
 const Home = ({ setIndex }: Props) => {
   const toast = useToast();
   const [injected, setInjected] = useState(true);
   const [free, setFres] = useState(0);
+
   const [value, setValue] = useState("");
   const [Tx, setTx] = useState("");
   const [injectedAccounts, setInjectedAccounts] = useState<InjectedAccountWithMeta[]>([]);
@@ -60,7 +60,6 @@ const Home = ({ setIndex }: Props) => {
         // get accounts info in extension
         const web3InjectedAccounts = await web3Accounts();
         if (web3InjectedAccounts.length !== 0) {
-          console.log(web3InjectedAccounts);
           setInjectedAccounts(web3InjectedAccounts);
         }
       }
@@ -68,6 +67,12 @@ const Home = ({ setIndex }: Props) => {
 
     initExtension();
   }, []);
+  useEffect(() => {
+    if (injectedAccounts.length !== 0) {
+      setValue(encodeAddress(injectedAccounts[0].address, 12191));
+    }
+  }, [injectedAccounts]);
+
   useEffect(() => {
     if (value) {
       getBalance(value).then(res => {
@@ -238,25 +243,6 @@ const Home = ({ setIndex }: Props) => {
             w="100%"
             alignItems="center" justifyContent="center"
           >
-            {injected && injectedAccounts.length === 0 ?
-              <Flex mb="34px" alignItems="center" justifyContent="center">
-                <Button
-                  width="100%"
-                  whiteSpace="normal"
-                  height="66px"
-                  color="#FFFFFF"
-                  fontSize="18px"
-                  fontFamily="TTHoves-Medium, TTHoves"
-                  fontWeight="500"
-                  background='#f50057'
-                  _hover={{
-                    background: '#c51162',
-                  }}
-                >
-                  {`Please use Polkadot extension create or import your account`}
-                </Button>
-              </Flex>
-              : null}
             {injected && injectedAccounts.length > 0 ?
               <Login
                 injectedAccounts={injectedAccounts}
@@ -282,7 +268,7 @@ const Home = ({ setIndex }: Props) => {
                     background: '#c51162',
                   }}
                   cursor="pointer"
-                  w="120px"
+                  w="80px"
                   h="40px"
                   lineHeight="40px"
                   color="#FFFFFF"
@@ -291,7 +277,7 @@ const Home = ({ setIndex }: Props) => {
                   fontWeight="500"
                   m="0px"
                   position="absolute"
-                  left="calc(50% - 65px)"
+                  left="calc(50% - 40px)"
                   top="-40px"
                   textAlign="center"
                   onClick={() => {
@@ -303,9 +289,9 @@ const Home = ({ setIndex }: Props) => {
                 </Text>
               </Flex>
             </Flex>
-            <Textarea
+            <Input
               width="100%"
-              maxWidth="320px"
+              maxWidth="470px"
               height="60px"
               minHeight="60px"
               background="#FFFFFF"
@@ -314,7 +300,7 @@ const Home = ({ setIndex }: Props) => {
               name="Gerald"
               value={formik.values.Gerald}
               onChange={formik.handleChange}
-              fontSize="16px"
+              fontSize="14px"
               fontFamily="TTHoves-Regular, TTHoves"
               fontWeight="400"
               color="#000000"
@@ -330,7 +316,7 @@ const Home = ({ setIndex }: Props) => {
               placeholder="To Native Address"
               _placeholder={{
                 color: '#999999',
-                fontSize: '16px',
+                fontSize: '14p x',
               }}
             />
           </Flex>
@@ -355,7 +341,7 @@ const Home = ({ setIndex }: Props) => {
               name="amount"
               value={formik.values.amount}
               onChange={formik.handleChange}
-              fontSize="16px"
+              fontSize="14px"
               fontFamily="TTHoves-Regular, TTHoves"
               fontWeight="400"
               lineHeight="14px"

@@ -30,9 +30,9 @@ export  function moneyDelete(num:string){
     let _num = num;
     _num = _num.toString();
     _num = _num.replace(/,/gi,'');
-    return (Number(_num)/1000000000000).toFixed(2)
+    return (Number(_num)/1000000000000).toFixed(0)
   }else{
     
-     return (Number(num)/1000000000000).toFixed(2)
+     return (Number(num)/1000000000000).toFixed(0)
   }
 }
