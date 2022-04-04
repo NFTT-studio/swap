@@ -2,7 +2,7 @@
 /* eslint-disable no-underscore-dangle */
 import { WsProvider, ApiPromise, Keyring } from '@polkadot/api';
 import { Client } from 'rpc-websockets';
-import { NODE_URL, SS58_FORMAT, TYPES } from '../constants';
+import { NODE_URL, SS58_FORMAT, TYPES } from '../../constants';
 
 interface PolkaSDKInitOptions {
   ss58Format: number

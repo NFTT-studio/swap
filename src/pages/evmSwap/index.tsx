@@ -16,8 +16,8 @@ import {
   useFormik,
 } from 'formik';
 import * as Yup from 'yup';
-import { withdrawBalance } from '../../contractUtil/api/EvmTosubstrate';
-import { getBalance } from '../../contractUtil/api/getBalance';
+import { withdrawBalance } from '../../SDK/contractUtil/api/EvmTosubstrate';
+import { getBalance } from '../../SDK/contractUtil/api/getBalance';
 import detectEthereumProvider from '@metamask/detect-provider';
 import NFTMart from '../../assets/images/NFTMart.png';
 import arrow from '../../assets/images/arrow.png';
@@ -98,12 +98,10 @@ const Home = ({ setIndex }: Props) => {
         provider?.on('accountsChanged', handleAccountsChanged);
         let chainId = await provider.request({ method: 'eth_chainId' });
         setChainId(chainId);
-        console.log(provider, chainId);
       } else {
         console.log('Please install MetaMask!');
       }
     };
-
     initExtension();
   }, []);
 
@@ -253,6 +251,7 @@ const Home = ({ setIndex }: Props) => {
               alignItems="center"
               justifyContent="center">
               <Button
+                onClick={_handleSwithChain}
                 textDecoration="none"
                 background='#f50057'
                 maxWidth="714px"

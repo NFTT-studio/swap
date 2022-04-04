@@ -44,7 +44,7 @@ export const txLog = (result: any, onSuccess = (res: any) => res) => {
       title: '',
       description: 'Transaction finalized',
       status: 'success',
-      duration: 8000,
+      duration: 6000,
     });
     onSuccess(result);
     console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);

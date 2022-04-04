@@ -2,7 +2,7 @@ import { web3FromAddress } from '@polkadot/extension-dapp';
 
 import { bnToBn } from '@polkadot/util';
 import PolkaSDK from '..';
-import { txLog } from '../../utils/txLog';
+import { txLog } from '../../../utils/txLog';
 import { web3Enable, web3Accounts } from '@polkadot/extension-dapp';
 
 type substrateToEvmProps = {

@@ -16,13 +16,9 @@ import {
   useFormik,
 } from 'formik';
 import * as Yup from 'yup';
-import { getBalance } from '../../SDK/polkaSDK/api/getBalance';
-import { substrateToEvm } from '../../SDK/polkaSDK/api/substrateToEvm';
-import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
-import { web3Accounts, web3Enable, web3FromSource } from '@polkadot/extension-dapp';
-import { encodeAddress } from '@polkadot/util-crypto';
-import Login from '../../components/Login';
-import { moneyDelete } from '../../utils/fomart';
+import { erc20toNative } from '../../SDK/erc20SDK/api/erc20toNative';
+import { getBalance } from '../../SDK/erc20SDK/api/getBalance';
+import detectEthereumProvider from '@metamask/detect-provider';
 import NFTMart from '../../assets/images/NFTMart.png';
 import arrow from '../../assets/images/arrow.png';
 
@@ -32,99 +28,157 @@ interface Props {
 }
 const Home = ({ setIndex }: Props) => {
   const toast = useToast();
-  const [injected, setInjected] = useState(true);
-  const [free, setFres] = useState(0);
-
-  const [value, setValue] = useState("");
   const [Tx, setTx] = useState("");
-  const [injectedAccounts, setInjectedAccounts] = useState<InjectedAccountWithMeta[]>([]);
+  const defaultIndex = localStorage.getItem('defaultIndex');
+  type EthereumProviderEip1193 = {
+    request: (args: {
+      method: string
+      params?: unknown[] | object
+    }) => Promise<unknown>
+  }
+  const [install, setInstall] = useState(true);
+  const [isProvider, setIsProvider] = useState<EthereumProviderEip1193>();
+  const [chainId, setChainId] = useState("0x1");
+  const [currentAccount, setCurrentAccount] = useState("");
+  const [free, setFree] = useState<number>(0);
+  const handleChainChanged = (_chainId: any) => {
+    window.location.reload();
+  }
+  const handleAccountsChanged = async (accounts: any) => {
+    if (accounts[0]) {
+      setCurrentAccount(accounts[0])
+      console.log(accounts[0])
+    } else {
+      setCurrentAccount("")
+    }
+  }
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const schema = Yup.object().shape({
-    Gerald: Yup.string().required("必填"),
-    amount: Yup.number().required("必填"),
+    receiver: Yup.string().required("Required"),
+    amount: Yup.number().min(1).required("Required"),
   });
-  const handleClick = async (index: number) => {
-    // treat first account as signer
-    await web3FromSource(injectedAccounts[index].meta.source);
-    // eslint-disable-next-line no-multi-assign
-    injectedAccounts[index].address = encodeAddress(injectedAccounts[index].address, 12191);
-    setValue(injectedAccounts[index].address);
-  };
-  useEffect(() => {
-    const initExtension = async () => {
-      const allInjected = await web3Enable('NFTMart');
-      if (allInjected.length === 0) {
-        setInjected(false);
-      } else {
-        setInjected(true);
-        // get accounts info in extension
-        const web3InjectedAccounts = await web3Accounts();
-        if (web3InjectedAccounts.length !== 0) {
-          setInjectedAccounts(web3InjectedAccounts);
-        }
+  const requestAccount = async () => {
+    try {
+      if (isProvider) {
+        let accounts = await isProvider.request({ method: 'eth_requestAccounts' });
+        await handleAccountsChanged(accounts);
       }
-    };
-
-    initExtension();
-  }, []);
-  useEffect(() => {
-    if (injectedAccounts.length !== 0) {
-      setValue(encodeAddress(injectedAccounts[0].address, 12191));
-    }
-  }, [injectedAccounts]);
-
-  useEffect(() => {
-    if (value) {
-      getBalance(value).then(res => {
-        setFres(res.free)
+    } catch (error: any) {
+      toast({
+        title: 'error',
+        status: 'error',
+        position: 'top',
+        duration: 3000,
+        description: error.message,
       });
     }
-  }, [value]);
+
+  }
+  const _handleSwithChain = async () => {
+    try {
+      await isProvider?.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x1' }],
+      });
+    } catch (switchError) {
+      console.info(switchError);
+    }
+  }
+
+  useEffect(() => {
+    const initExtension = async () => {
+      const provider: any = await detectEthereumProvider();
+      if (provider) {
+        setIsProvider(provider);
+        setInstall(true);
+        provider?.on('chainChanged', handleChainChanged);
+        provider?.on('accountsChanged', handleAccountsChanged);
+        let chainId = await provider.request({ method: 'eth_chainId' });
+        setChainId(chainId);
+        console.log(provider, chainId);
+      } else {
+        console.log('Please install MetaMask!');
+      }
+    };
+    initExtension();
+  }, []);
+
+  useEffect(() => {
+    const init = async () => {
+      if (isProvider && currentAccount) {
+        let nmtBalance = await getBalance({ isProvider, currentAccount });
+        console.log(nmtBalance, currentAccount);
+        setFree(nmtBalance || 0);
+      }
+    };
+    init();
+  }, [currentAccount, Tx, isProvider]);
+  useEffect(() => {
+    // const initExtension = async () => {
+    //   await requestAccount();
+    // };
+    // if (defaultIndex === "1") {
+    //   initExtension();
+    // }
+  }, [isProvider, defaultIndex]);
+  const _handleConnectClick = async () => {
+    if (!isProvider) {
+      toast({
+        title: 'error',
+        status: 'error',
+        position: 'top',
+        duration: 3000,
+        description: "Please Install MetaMask First",
+      });
+      return;
+    }
+    if (chainId !== '0x1') {
+      toast({
+        title: 'error',
+        status: 'error',
+        position: 'top',
+        duration: 3000,
+        description: "Please Select NFTMart EVM Testnet First",
+      });
+      return;
+    }
+    requestAccount();
+  }
+
   const formik = useFormik({
     initialValues: {
+      receiver: '',
       amount: '',
-      Gerald: '',
     },
     onSubmit: (formValue, formAction) => {
       setIsSubmitting(true);
-      substrateToEvm({
-        address: value,
+      erc20toNative({
+        isProvider: isProvider,
+        receiver: formValue?.receiver,
         amount: formValue?.amount,
-        Gerald: formValue?.Gerald,
         cb: {
           success: (result: any) => {
-            if (result.dispatchError) {
-              toast({
-                title: 'error',
-                status: 'error',
-                position: 'top',
-                duration: 3000,
-                description: result.dispatchError.toString(),
-              });
-              setIsSubmitting(false);
-            } else {
-              toast({
-                title: "success",
-                status: 'success',
-                position: 'top',
-                duration: 3000,
-              });
-              setTx(result.txHash.toString())
-              setIsSubmitting(false);
-            }
+            toast({
+              title: 'success',
+              status: 'success',
+              position: 'top',
+              duration: 9000,
+              description: `success`,
+              isClosable: true,
+            });
+            setTx(result.toString());
+            setIsSubmitting(false);
           },
           error: (error) => {
-            if (error.toString() === 'Error: Cancelled') {
-              setIsSubmitting(false);
-            } else {
-              toast({
-                title: 'error',
-                status: 'error',
-                position: 'top',
-                duration: 3000,
-                description: error,
-              });
-            }
+            toast({
+              title: 'error',
+              status: 'error',
+              position: 'top',
+              duration: 9000,
+              description: error.message,
+              isClosable: true,
+            });
             setIsSubmitting(false);
           },
         },
@@ -139,11 +193,13 @@ const Home = ({ setIndex }: Props) => {
         onSubmit={formik.handleSubmit}
         style={{
           width: "100%",
+          height: "100%",
         }}
       >
         <Flex
           maxW="100%"
           w="100%"
+          height="100%"
           p="30px"
           flexDirection="column"
           alignItems="center"
@@ -151,7 +207,7 @@ const Home = ({ setIndex }: Props) => {
           borderRadius="5px"
           border="1px solid #E5E5E5"
         >
-          {!injected ?
+          {!install ?
             <Flex width="100%" mb="25px" alignItems="center" justifyContent="center">
               <Link
                 maxWidth="714px"
@@ -161,7 +217,7 @@ const Home = ({ setIndex }: Props) => {
                 _hover={{
                   textDecoration: "none",
                 }}
-                href="https://docs.google.com/forms/d/1WCNeiufW1XxLsyme7dJUys7y7t-XJRyp1nQR0bhnvVQ"
+                href="https://metamask.io/download.html"
               >
                 <Button
                   textDecoration="none"
@@ -179,13 +235,65 @@ const Home = ({ setIndex }: Props) => {
                     background: '#c51162',
                   }}
                 >
-                  {`please install polkdot{.js}`}
+                  {`please install metamask`}
                 </Button>
               </Link>
             </Flex>
             : null}
+          {install && chainId !== '0x1' ?
+            <Flex
+              mb="25px"
+              width="100%"
+              maxWidth="714px"
+              textDecoration="none"
+              _hover={{
+                textDecoration: "none",
+              }}
+              alignItems="center"
+              justifyContent="center">
+              <Button
+                onClick={_handleSwithChain}
+                textDecoration="none"
+                background='#f50057'
+                maxWidth="714px"
+                width="100%"
+                // whiteSpace="normal"
+                height="36px"
+                color="#FFFFFF"
+                fontSize="18px"
+                fontFamily="TTHoves-Medium, TTHoves"
+                fontWeight="500"
+                _hover={{
+                  textDecoration: "none",
+                  background: '#c51162',
+                }}
+              >
+                {`Please Select NFTMart EVM Testnet First`}
+              </Button>
+            </Flex>
+            : null}
           <Flex width="100%" mb="30px" alignItems="center" justifyContent="center">
             <Flex
+              flexDirection="column"
+              alignItems="center"
+            >
+              <Flex
+                mb="25px"
+                position="relative"
+              >
+                <Image
+                  src={NFTMart}
+                />
+              </Flex>
+              <Text
+                w="90px"
+                textAlign="center"
+              >
+                NMT ERC20
+              </Text>
+            </Flex>
+            <Flex
+              ml="44%"
               flexDirection="column"
               alignItems="center"
             >
@@ -203,52 +311,67 @@ const Home = ({ setIndex }: Props) => {
                 NMT Native
               </Text>
             </Flex>
-            <Flex
-              ml="44%"
-              flexDirection="column"
-              alignItems="center"
-            >
-              <Flex
-                mb="25px"
-                position="relative"
-              >
-                <Image
-                  src={NFTMart}
-                />
-                <Text
-                  cursor=""
-                  height="26px"
-                  m="0px"
-                  p="0px"
-                  position="absolute"
-                  right="3px"
-                  bottom="0"
-                  textAlign="center"
-                  color="#FF0707"
-                  fontWeight='bold'
-                  fontSize="20px"
-                >
-                  E
-                </Text>
-              </Flex>
-              <Text
-                w="90px"
-                textAlign="center"
-              >
-                NMT EVM
-              </Text>
-            </Flex>
           </Flex>
+
           <Flex
             w="100%"
             alignItems="center" justifyContent="center"
           >
-            {injected && injectedAccounts.length > 0 ?
-              <Login
-                injectedAccounts={injectedAccounts}
-                handleClick={handleClick}
-                value={value}
+            {install && currentAccount !== "" && chainId === '0x1' ?
+              <Input
+                maxWidth="470px"
+                width="100%"
+                height="60px"
+                minHeight="60px"
+                background="#FFFFFF"
+                borderRadius="5px"
+                id="address"
+                name="address"
+                value={currentAccount}
+                isReadOnly
+                fontSize="14px"
+                fontFamily="TTHoves-Regular, TTHoves"
+                fontWeight="400"
+                lineHeight="14px"
+                isDisabled
+                _focus={{
+                  boxShadow: 'none',
+                  color: '#000000',
+                }}
+                _after={{
+                  boxShadow: 'none',
+                  color: '#000000',
+                  border: '1px solid #000000',
+                }}
+                placeholder="To Native Address"
+                _placeholder={{
+                  color: '#999999',
+                  fontSize: '12px',
+                }}
               />
+              : null}
+            {install && currentAccount === "" ?
+              <Flex
+                width="100%"
+                maxWidth="470px"
+                alignItems="center" justifyContent="center">
+                <Button
+                  background='#f50057'
+                  width="100%"
+                  height="60px"
+                  whiteSpace="normal"
+                  color="#FFFFFF"
+                  fontSize="18px"
+                  fontFamily="TTHoves-Medium, TTHoves"
+                  fontWeight="500"
+                  _hover={{
+                    background: '#c51162',
+                  }}
+                  onClick={() => _handleConnectClick()}
+                >
+                  {`Connect Wallet`}
+                </Button>
+              </Flex>
               : null}
             <Flex
               p="2%"
@@ -262,31 +385,6 @@ const Home = ({ setIndex }: Props) => {
                 <Image
                   src={arrow}
                 />
-                <Text
-                  background='#f50057'
-                  _hover={{
-                    background: '#c51162',
-                  }}
-                  cursor="pointer"
-                  w="80px"
-                  h="40px"
-                  lineHeight="40px"
-                  color="#FFFFFF"
-                  fontSize="18px"
-                  fontFamily="TTHoves-Medium, TTHoves"
-                  fontWeight="500"
-                  m="0px"
-                  position="absolute"
-                  left="calc(50% - 40px)"
-                  top="-40px"
-                  textAlign="center"
-                  onClick={() => {
-                    localStorage.setItem('defaultIndex', '1')
-                    setIndex("1");
-                  }}
-                >
-                  switch
-                </Text>
               </Flex>
             </Flex>
             <Input
@@ -296,9 +394,9 @@ const Home = ({ setIndex }: Props) => {
               minHeight="60px"
               background="#FFFFFF"
               borderRadius="5px"
-              id="Gerald"
-              name="Gerald"
-              value={formik.values.Gerald}
+              id="receiver"
+              name="receiver"
+              value={formik.values.receiver}
               onChange={formik.handleChange}
               fontSize="14px"
               fontFamily="TTHoves-Regular, TTHoves"
@@ -316,15 +414,16 @@ const Home = ({ setIndex }: Props) => {
               placeholder="To Native Address"
               _placeholder={{
                 color: '#999999',
-                fontSize: '14p x',
+                fontSize: '14px',
               }}
             />
+            {formik.errors.receiver && formik.touched.receiver ? (
+              <div style={{ color: 'red' }}>{formik.errors.receiver}</div>
+            ) : null}
+
           </Flex>
 
 
-          {formik.errors.Gerald && formik.touched.Gerald ? (
-            <div style={{ color: 'red' }}>{formik.errors.Gerald}</div>
-          ) : null}
           <InputGroup
             width="100%"
             maxWidth="320px"
@@ -356,7 +455,7 @@ const Home = ({ setIndex }: Props) => {
                 color: '#000000',
                 border: '1px solid #000000',
               }}
-              placeholder={`Remaining amount ${free && moneyDelete(free.toString())}`}
+              placeholder={`Remaining amount ${free && free}`}
               _placeholder={{
                 color: '#999999',
                 fontSize: '12px',
@@ -366,7 +465,7 @@ const Home = ({ setIndex }: Props) => {
               width="72px"
               height="40px"
               background="#F4F4F4"
-              borderRadius="0px 5px 5px 0px"
+              borderRadius="0px 4px 4px 0px"
               border="1px solid #E5E5E5"
               fontSize="14px"
               fontFamily="TTHoves-Regular, TTHoves"
@@ -389,7 +488,8 @@ const Home = ({ setIndex }: Props) => {
               fontFamily="TTHoves-Medium, TTHoves"
               fontWeight="500"
               lineHeight="20px"
-              borderRadius="5px"
+              borderRadius="4px"
+              isDisabled={chainId !== '0x1' || !currentAccount}
               type="submit"
               _hover={{
                 background: '#000000 !important',
@@ -445,7 +545,7 @@ const Home = ({ setIndex }: Props) => {
               fontWeight="400"
               color="#858999"
             >
-              Power by NFTMart.io   NMTSwap Source Code
+              {""}
             </Text>
           </Flex>
         </Flex>

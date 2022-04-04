@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import MainContainer from '../../MainContainer';
 import PolkaSwap from '../polkaSwap';
 import EvmSwap from '../evmSwap';
+import ERC20Swap from '../erc20Swap';
+
 import { Tabs, TabList, TabPanels, Tab, TabPanel, Flex, Link } from '@chakra-ui/react'
 
 const Home = () => {
@@ -15,6 +17,11 @@ const Home = () => {
       <MainContainer title={"NFTMart"}>
         <Tabs
           w="100%"
+          maxWidth="1280px"
+          h="100%"
+          minHeight="700px"
+          m="20px 20px"
+          boxSizing="border-box"
           isManual variant='enclosed'
           _focus={{ boxShadow: 'none' }}
           border="1px solid #E5E5E5"
@@ -23,6 +30,7 @@ const Home = () => {
         >
           <TabList
             m="0px 16px"
+            height="100%"
             boxSizing='border-box'
           >
             <Tab
@@ -31,20 +39,20 @@ const Home = () => {
                 localStorage.setItem('tabIndex', '0')
               }}
               _focus={{ boxShadow: 'none' }}
-            >One</Tab>
+            >{"NMT ERC20 to Native"}</Tab>
             <Tab
               w="50%"
               onClick={() => {
                 localStorage.setItem('tabIndex', '1')
               }}
               _focus={{ boxShadow: 'none' }}
-            >Two</Tab>
+            >{"Substrate <-> EVM"}</Tab>
           </TabList>
-          <TabPanels w="100%">
-            <TabPanel>
-              <EvmSwap setIndex={setIndex} />
+          <TabPanels w="100%" height="100%">
+            <TabPanel height="100%">
+              <ERC20Swap setIndex={setIndex} />
             </TabPanel>
-            <TabPanel>
+            <TabPanel height="100%">
               {defaultIndex === "0" ?
                 <PolkaSwap setIndex={setIndex} /> : null}
               {defaultIndex === "1" ?
