@@ -15,7 +15,11 @@ const Home = () => {
   return (
     <>
       <MainContainer title={"NFTMart"}>
-        <Tabs
+        {defaultIndex === "0" ?
+          <PolkaSwap setIndex={setIndex} /> : null}
+        {defaultIndex === "1" ?
+          <EvmSwap setIndex={setIndex} /> : null}
+        {/* <Tabs
           w="100%"
           maxWidth="1280px"
           h="100%"
@@ -59,7 +63,7 @@ const Home = () => {
                 <EvmSwap setIndex={setIndex} /> : null}
             </TabPanel>
           </TabPanels>
-        </Tabs>
+        </Tabs> */}
       </MainContainer>
       <Flex
         background="#f5f5f5"
